@@ -388,46 +388,46 @@ class AudioPlayer extends PageLinesSection {
 
 		$title = ( get_the_title( $post->ID ) ) ? get_the_title( $post->ID ) : 'Audio Track has not title' ;
 
-		if(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
-			$mp3 = $single_ap_local_options['single_ap_mp3'];
-		}
 		if ( $mp3_array['0'] ) {
 			$mp3 = $mp3_array['0'];
 		}
-
-		if(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
-			$ogg = $single_ap_local_options['single_ap_ogg'];
+		if(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
+			$mp3 = $single_ap_local_options['single_ap_mp3'];
 		}
+
 		if ( $ogg_array['0'] ) {
 			$ogg = $ogg_array['0'];
 		}
-
-		if(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
-			$link = $single_ap_local_options['single_ap_button_link'];
+		if(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
+			$ogg = $single_ap_local_options['single_ap_ogg'];
 		}
+
 		if ( $link_array['0'] ) {
 			$link = $link_array['0'];
 		}
-
-		if(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
-			$link_text = $single_ap_local_options['single_ap_button_text'];
+		if(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
+			$link = $single_ap_local_options['single_ap_button_link'];
 		}
+
 		if ( $link_text_array['0'] ) {
 			$link_text = $link_text_array['0'];
 		}
-
-		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
-			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
+		if(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
+			$link_text = $single_ap_local_options['single_ap_button_text'];
 		}
+
 		if ( $soundcloud_array['0'] ) {
 			$soundcloud = $soundcloud_array['0'];
 		}
-
-		if(! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
-			$podcast = $single_ap_podcast_options['single_ap_podcast'];
+		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
+			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
 		}
+
 		if ( $podcast_array['0'] ) {
 			$podcast = $podcast_array['0'];
+		}
+		if(! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
+			$podcast = $single_ap_podcast_options['single_ap_podcast'];
 		}
 
 		if ( is_array($type_array) ) {

@@ -412,16 +412,16 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
 			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
-		} elseif(! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
-			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
+		} elseif(! empty( $single_ap_soundcloud_options['single_ap_soundcloud_array'] ) ) {
+			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud_array'];
 		} else {
 			$soundcloud = '';
 		}
 
 		if ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
 			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
-		} elseif(! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
-			$podcast = $single_ap_podcast_options['single_ap_podcast'];
+		} elseif(! empty( $single_ap_podcast_options['single_ap_podcast_array'] ) ) {
+			$podcast = $single_ap_podcast_options['single_ap_podcast_array'];
 		} else {
 			$podcast = '';
 		}
@@ -642,7 +642,7 @@ class AudioPlayer extends PageLinesSection {
 					'cols' => 4,
 					'fields' => array(
 						array(
-							'id'  => 'single_ap_soundcloud',
+							'id'  => 'single_ap_soundcloud_array',
 							'name'  => __( 'Link to SoundCloud Track or Playlist', 'audio-player' ),
 							'type'   => 'text_url',
 						),
@@ -656,7 +656,7 @@ class AudioPlayer extends PageLinesSection {
 					'cols' => 4,
 					'fields' => array(
 						array(
-							'id'  => 'single_ap_podcast',
+							'id'  => 'single_ap_podcast_array',
 							'name'  => __( 'Link to podcast...', 'audio-player' ),
 							'type'   => 'text_url',
 							'desc' => __( 'Details for Podcast Audio goes here.</br>If your playlist appear blank and the player does not play anything, then you did not type in a valid podcast link. A podcast is NOT a MP3 file, but for example a .xml file like this: "http://feeds.feedburner.com/dumbassguide?format=xml"', 'audio-player' ),

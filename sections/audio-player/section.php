@@ -521,7 +521,7 @@ class AudioPlayer extends PageLinesSection {
 				array(
 					'key' => 'ap_playlist_select',
 					'type' 			=> 'select_taxonomy',
-					'post_type'	=> 'audio-player-playlists',
+					'post_type'	=> $this->ptID,
 					'label'	=> __( 'Playlist To Show', 'audio-player' ),
 				),
 

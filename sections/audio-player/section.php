@@ -438,12 +438,6 @@ class AudioPlayer extends PageLinesSection {
 
 		$type = ( $type_array['0'] ) ? $type_array['0'] : 'soundcloud' ;
 
-		plprint($single_ap_local_options);
-
-		plprint($single_ap_podcast_options);
-
-		plprint($soundcloud);
-
 		?>
 
 			<li class= "playlistItem"
@@ -492,7 +486,7 @@ class AudioPlayer extends PageLinesSection {
 			<strong>Read the instructions below before asking for additional help:</strong>
 			</br></br>
 			<strong>1.</strong> Go to Wordpress backend and create a new Audio Track. </br></br>
-			<strong>2.</strong> Input Title, Content (Optional), and a Link to the Folio (Optional). You also have to set a Thumbnail for the Folio. </br></br>
+			<strong>2.</strong> Input Title, Audio Type, and options for the selected Audio Track. </br></br>
 			<strong>3.</strong> Choose Categories for your Folio . </br></br>
 			<strong>4.</strong> Go back to Folio\'s Section options and choose which category to show. Here you can also set the thumbnail height.
 			</br></br>
@@ -527,7 +521,7 @@ class AudioPlayer extends PageLinesSection {
 				array(
 					'key' => 'ap_playlist_select',
 					'type' 			=> 'select_taxonomy',
-					'post_type'	=> 'audio-player',
+					'post_type'	=> 'audio-player-playlists',
 					'label'	=> __( 'Playlist To Show', 'audio-player' ),
 				),
 

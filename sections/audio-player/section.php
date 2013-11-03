@@ -409,19 +409,19 @@ class AudioPlayer extends PageLinesSection {
 		} else {
 			$link_text = '';
 		}
-
-		if ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
-			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
-		} elseif(! empty( $single_ap_soundcloud_options['single_ap_soundcloud_array'] ) ) {
+		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud_array'] ) ) {
 			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud_array'];
+		}
+		elseif ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
+			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
 		} else {
 			$soundcloud = '';
 		}
-
-		if ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
-			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
-		} elseif(! empty( $single_ap_podcast_options['single_ap_podcast_array'] ) ) {
+		if(! empty( $single_ap_podcast_options['single_ap_podcast_array'] ) ) {
 			$podcast = $single_ap_podcast_options['single_ap_podcast_array'];
+		}
+		elseif ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
+			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
 		} else {
 			$podcast = '';
 		}

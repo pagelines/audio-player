@@ -15,14 +15,18 @@ class AudioPlayer extends PageLinesSection {
 
 	var $ptID = 'audio-player';
 	var $taxID = 'audio-player-playlists';
-	const version = '1.0';
 
 	function section_persistent(){
 
 		add_filter( 'upload_mimes', array(&$this, 'custom_mimes' ) );
 
 		$this->post_type_setup();
-		$this->post_meta_setup();
+
+		if(! class_exists( 'CMB_Meta_Box' ) ) {
+			require_once( 'custom-meta/custom-meta-boxes.php' );
+		}
+
+		add_filter( 'cmb_meta_boxes', array( &$this, 'custom_meta' ) );
 
 	}
 
@@ -56,7 +60,7 @@ class AudioPlayer extends PageLinesSection {
 
 		$buttons_path = $this->base_url.'/img/';
 
-		$soundcloud_api = ( ploption( 'ap_soundcloud_api', $this->oset ) ) ? ploption( 'ap_soundcloud_api', $this->oset ) : '';
+		$soundcloud_api = ( $this->opt( 'ap_soundcloud_api') ) ? $this->opt( 'ap_soundcloud_api' ) : '';
 
 			?>
 
@@ -194,9 +198,9 @@ class AudioPlayer extends PageLinesSection {
 
 		$buttons_path = $this->base_url.'/img/';
 
-		$playlist_image = ( ploption( 'ap_playlist_image', $this->oset ) ) ? ploption( 'ap_playlist_image', $this->oset ) : null;
+		$playlist_image = ( $this->opt( 'ap_playlist_image' ) ) ? $this->opt( 'ap_playlist_image') : null;
 
-		$playlist_description =  do_shortcode( ploption( 'ap_playlist_description', $this->oset ) ) ? ploption( 'ap_playlist_description', $this->oset ) : null;
+		$playlist_description =  do_shortcode( $this->opt( 'ap_playlist_description' ) ) ? $this->opt( 'ap_playlist_description' ) : null;
 
 		$playerspan = '12';
 
@@ -328,9 +332,9 @@ class AudioPlayer extends PageLinesSection {
 
 					<?php
 
-						$playlist = ( ploption( 'ap_playlist_select', $this->oset ) ) ? ploption( 'ap_playlist_select', $this->oset ) : null;
-//						$orderby = ( ploption( 'ap_playlist_orderby', $this->oset ) ) ? ploption( 'ap_playlist_orderby', $this->oset ) : 'menu_order';
-//						$order = ( ploption( 'ap_playlist_order', $this->oset ) ) ? ploption( 'ap_playlist_order', $this->oset ) : 'ASC';
+						$playlist = ( $this->opt( 'ap_playlist_select' ) ) ? $this->opt( 'ap_playlist_select' ) : null;
+//						$orderby = ( $this->opt( 'ap_playlist_orderby' ) ) ? $this->opt( 'ap_playlist_orderby' ) : 'menu_order';
+//						$order = ( $this->opt( 'ap_playlist_order' ) ) ? $this->opt( 'ap_playlist_order' ) : 'ASC';
 
 						$args = array(
 							'post_type'	=> $this->ptID,
@@ -364,23 +368,77 @@ class AudioPlayer extends PageLinesSection {
 
 		global $post;
 
-		$cover = ( get_post_meta( $post->ID, 'single_ap_image', $this->oset ) );
+		$single_ap_local_options = get_post_meta( $post->ID, 'single_ap_local_options', true );
+
+		$single_ap_podcast_options = get_post_meta( $post->ID, 'single_ap_podcast_options', true );
+
+		$single_ap_soundcloud_options = get_post_meta( $post->ID, 'single_ap_soundcloud_options', true );
+
+		$type_array = get_post_meta( $post->ID,'single_ap_type' );
 
 		$title = ( get_the_title( $post->ID ) ) ? get_the_title( $post->ID ) : 'Audio Track has not title' ;
 
-		$mp3 = ( get_post_meta( $post->ID,'single_ap_mp3', $this->oset ) );
+		if ( get_post_meta( $post->ID,'single_ap_mp3' ) ) {
+			$mp3 = get_post_meta( $post->ID,'single_ap_mp3' );
+		} elseif( isset( $single_ap_local_options['single_ap_mp3'] ) ) {
+			$mp3 = $single_ap_local_options['single_ap_mp3'];
+		} else {
+			$mp3 = '';
+		}
 
-		$ogg = ( get_post_meta( $post->ID,'single_ap_ogg', $this->oset ) );
+		if ( get_post_meta( $post->ID,'single_ap_ogg' ) ) {
+			$ogg = get_post_meta( $post->ID,'single_ap_ogg' );
+		} elseif( isset( $single_ap_local_options['single_ap_ogg'] ) ) {
+			$ogg = $single_ap_local_options['single_ap_ogg'];
+		} else {
+			$ogg = '';
+		}
 
-		$link = ( get_post_meta( $post->ID,'single_ap_button_link', $this->oset ) );
+		if ( get_post_meta( $post->ID,'single_ap_button_link' ) ) {
+			$link = get_post_meta( $post->ID,'single_ap_button_link' );
+		} elseif( isset( $single_ap_local_options['single_ap_button_link'] ) ) {
+			$link = $single_ap_local_options['single_ap_button_link'];
+		} else {
+			$link = '';
+		}
 
-		$link_text = ( get_post_meta( $post->ID,'single_ap_button_text', $this->oset ) );
+		if ( get_post_meta( $post->ID,'single_ap_button_text' ) ) {
+			$link_text = get_post_meta( $post->ID,'single_ap_button_text' );
+		} elseif( isset( $single_ap_local_options['single_ap_button_text'] ) ) {
+			$link_text = $single_ap_local_options['single_ap_button_text'];
+		} else {
+			$link_text = '';
+		}
 
-		$soundcloud = ( get_post_meta( $post->ID,'single_ap_soundcloud', $this->oset ) );
+		if ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
+			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
+		} elseif( isset( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
+			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
+		} else {
+			$soundcloud = '';
+		}
 
-		$podcast = ( get_post_meta( $post->ID,'single_ap_podcast', $this->oset ) );
+		if ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
+			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
+		} elseif( isset( $single_ap_podcast_options['single_ap_podcast'] ) ) {
+			$podcast = $single_ap_podcast_options['single_ap_podcast'];
+		} else {
+			$podcast = '';
+		}
 
-		$type = ( get_post_meta( $post->ID,'single_ap_type', $this->oset ) ) ? get_post_meta( $post->ID,'single_ap_type', $this->oset ) : 'local' ;
+		if ( is_array($type_array) ) {
+			$type = $type_array['0'];
+		} else {
+			$type = $type_array;
+		}
+
+		$type = ( $type_array['0'] ) ? $type_array['0'] : 'soundcloud' ;
+
+		plprint($single_ap_local_options);
+
+		plprint($single_ap_podcast_options);
+
+		plprint($single_ap_soundcloud_options);
 
 		?>
 
@@ -422,210 +480,193 @@ class AudioPlayer extends PageLinesSection {
 
 	}
 
-	function section_optionator($settings) {
-		$settings = wp_parse_args($settings, $this->optionator_default);
+	function section_opts() {
 
-		$tab = array(
+		$options = array();
 
-			'ap_playlist_select' => array(
-				'default'		=> '',
-				'type' 			=> 'select_taxonomy',
-				'taxonomy_id'	=> $this->taxID,
-				'inputlabel'	=> __( 'Playlist to show', 'AudioPlayer' ),
-			),
+		$how_to_use = __( '
+			<strong>Read the instructions below before asking for additional help:</strong>
+			</br></br>
+			<strong>1.</strong> Go to Wordpress backend and create a new Audio Track. </br></br>
+			<strong>2.</strong> Input Title, Content (Optional), and a Link to the Folio (Optional). You also have to set a Thumbnail for the Folio. </br></br>
+			<strong>3.</strong> Choose Categories for your Folio . </br></br>
+			<strong>4.</strong> Go back to Folio\'s Section options and choose which category to show. Here you can also set the thumbnail height.
+			</br></br>
+			<div class="row zmb">
+				<div class="span6 tac zmb">
+					<a class="btn btn-info" href="http://forum.pagelines.com/71-products-by-aleksander-hansson/" target="_blank" style="padding:4px 0 4px;width:100%"><i class="icon-ambulance"></i>          Forum</a>
+				</div>
+				<div class="span6 tac zmb">
+					<a class="btn btn-info" href="http://betterdms.com" target="_blank" style="padding:4px 0 4px;width:100%"><i class="icon-align-justify"></i>          Better DMS</a>
+				</div>
+			</div>
+			<div class="row zmb" style="margin-top:4px;">
+				<div class="span12 tac zmb">
+					<a class="btn btn-success" href="http://shop.ahansson.com" target="_blank" style="padding:4px 0 4px;width:100%"><i class="icon-shopping-cart" ></i>          My Shop</a>
+				</div>
+			</div>
+		', 'audio-player' );
 
-//			'ap_playlist_orderby' => array(
-//				'inputlabel' => 'Order According To (Default: Menu Order)',
-//				'type' => 'select',
-//				'selectvalues' => array(
-//					'title'   => array( 'name' => "Using Audio Track Title" ),
-//					'post_date'  => array( 'name' => "Using Post Date" ),
-//					'rand'   => array( 'name' => "Random Selection" ),
-//					'ID'   => array( 'name' => "Audio Track ID" ),
-//				)
-//			),
+		$options[] = array(
+			'key' => 'folio_help',
+			'type'     => 'template',
+			'template'      => do_shortcode( $how_to_use ),
+			'title' =>__( 'How to use:', 'audio-player' ) ,
+		);
 
-//			'ap_playlist_order'  => array(
-//				'inputlabel' => 'Order Type (Default: ASC)',
-//				'type' => 'select',
-//				'selectvalues' => array(
-//					'ASC'   => array( 'name' => "Ascending Order" ),
-//					'DESC'   => array( 'name' => "Descending Order" ),
-//				)
-//			),
+		$options[] = array(
+			'key' => 'ap_settings',
+			'title' => __( 'Folio Settings', 'audio-player' ),
+			'type'	=> 'multi',
+			'opts'	=> array(
 
-			'ap_playlist_image'  => array(
-				'inputlabel'  => __( 'Playlist Image', 'AudioPlayer' ),
-				'type'   => 'image_upload',
-				'title'   => __( 'Playlist Image', 'AudioPlayer' ),
-				'shortexp'   => __( 'Upload a playlist image... </br>Recommended image size: 160x160</br>Images will scale to match the size of the image area, not crop.', 'AudioPlayer' )
-			),
+				array(
+					'key' => 'ap_playlist_select',
+					'type' 			=> 'select_taxonomy',
+					'post_type'	=> 'audio-player',
+					'label'	=> __( 'Playlist To Show', 'audio-player' ),
+				),
 
-			'ap_playlist_description'  => array(
-				'inputlabel'  => __( 'Playlist Description', 'AudioPlayer' ),
-				'type'   => 'textarea',
-				'title'   => __( 'Playlist Description', 'AudioPlayer' ),
-				'shortexp'   => __( 'Type in your description of your playlist...', 'AudioPlayer' )
-			),
+				array(
+					'key' => 'ap_playlist_image',
+					'label'  => __( 'Playlist Image', 'audio-player' ),
+					'type'   => 'image_upload',
+					'help'   => __( 'Upload a playlist image... </br>Recommended image size: 160x160</br>Images will scale to match the size of the image area, not crop.', 'audio-player' )
+				),
 
-			'ap_soundcloud_api'  => array(
-				'inputlabel'  => __( 'SoundCloud API Key', 'AudioPlayer' ),
-				'type'   => 'text',
-				'title'   => __( 'SoundCloud API Key', 'AudioPlayer' ),
-				'shortexp'   => __( 'If you want to use SoundCloud music, register your own api key <a href="http://soundcloud.com/you/apps/new" target="_blank">here for free</a> and enter Client ID', 'AudioPlayer' )
-			),
+				array(
+					'key' => 'ap_playlist_description',
+					'label'  => __( 'Playlist Description', 'audio-player' ),
+					'type'   => 'textarea',
+					'title'   => __( 'Playlist Description', 'audio-player' ),
+					'help'   => __( 'Type in your description of your playlist...', 'audio-player' )
+				),
 
-//			'ap_directions'	=> array(
-//				'type'		=> '',
-//				'title'	=> __('<strong style="display:block;font-size:16px;color:#eaeaea;text-shadow:0 1px 0 black;padding:7px 7px 5px;background:#333;margin-top:5px;border-radius:3px;border:1px solid white;letter-spacing:0.1em;box-shadow:inset 0 0 3px black;">HOW TO USE:</strong>', 'AudioPlayer'),
-//				'shortexp'   => __('', 'AudioPlayer'),
-//			),
+				array(
+					'key' => 'ap_soundcloud_api',
+					'label'  => __( 'SoundCloud API Key', 'audio-player' ),
+					'type'   => 'text',
+					'title'   => __( 'SoundCloud API Key', 'audio-player' ),
+					'help'   => __( 'If you want to use SoundCloud music, register your own api key <a href="http://soundcloud.com/you/apps/new" target="_blank">here for free</a> and enter Client ID', 'audio-player' )
+				),
+			)
 
 		);
 
-		$tab_settings = array(
-			'id'		=> 'audioplayer_meta',
-			'name'	=> 'Audio Player',
-			'icon'	=> $this->icon,
-			'clone_id'  => $settings['clone_id'],
-			'active'	=> $settings['active']
-		);
-
-		register_metatab( $tab_settings, $tab);
+		return $options;
 	}
 
 	function post_type_setup(){
 
 		$args = array(
-			'label'			=> __('Audio Tracks', 'AudioPlayer'),
-			'singular_label'	=> __('Audio Track', 'AudioPlayer'),
-			'description'	=> __('For creating Audio Tracks', 'AudioPlayer'),
+			'label'			=> __('Audio Tracks', 'audio-player'),
+			'singular_label'	=> __('Audio Track', 'audio-player'),
+			'description'	=> __('For creating Audio Tracks', 'audio-player'),
 			'menu_icon'		=> $this->icon,
 			'supports'		=> array('title'),
 		);
 		$taxonomies = array(
 			$this->taxID => array(
-				"label" => __('Playlists', 'AudioPlayer'),
-				"singular_label" => __('Playlist', 'AudioPlayer'),
+				"label" => __('Playlists', 'audio-player'),
+				"singular_label" => __('Playlist', 'audio-player'),
 			)
 		);
 
 		$columns = array(
 			"cb"			=> "<input type=\"checkbox\" />",
-			"title"		=> __('Title', 'AudioPlayer'),
-			"description"   => __('Text', 'AudioPlayer'),
-			"event-categories"	=> __('Playlists', 'AudioPlayer'),
+			"title"		=> __('Title', 'audio-player'),
+			"description"   => __('Text', 'audio-player'),
+			"event-categories"	=> __('Playlists', 'audio-player'),
 		);
 
 		$this->post_type = new PageLinesPostType( $this->ptID, $args, $taxonomies,$columns,array(&$this, 'column_display'));
 
 	}
 
+	function custom_meta( array $meta_boxes ) {
 
-	function post_meta_setup(){
-
-		$type_meta_array = array(
-
-			'single_ap_type'  => array(
-				'default'       => '',
-				'type'           => 'select',
-				'selectvalues'     => array(
-					'local' => array( 'name' => __( 'Local'   , 'AudioPlayer' )),
-					'soundcloud' => array( 'name' => __( 'SoundCloud'   , 'AudioPlayer' )),
-					'podcast' => array( 'name' => __( 'Podcast'   , 'AudioPlayer' ))
+	    $meta_boxes[] = array(
+	        'title' => 'Audio Track Setup',
+	        'pages' => 'audio-player',
+	        'desc' => __( 'Mixed sources is not recommended but is possible!', 'audio-player' ),
+	        'fields' => array(
+	        	array(
+				    'id'      => 'single_ap_type',
+				    'type'    => 'select',
+				    'desc'	  => __( 'Mixed Audio in Playlists are supported but not reccomended.', 'audio-player' ),
+				    'name'	  => __( 'Audio Type (Required)', 'audio-player' ),
+				    'default' => 'soundcloud',
+				    'options' => array(
+				        'local' => __( 'Local'   , 'audio-player' ),
+						'soundcloud' => __( 'SoundCloud'   , 'audio-player' ),
+						'podcast' => __( 'Podcast'   , 'audio-player' )
+				    )
 				),
-				'inputlabel'  =>  __('Choose Audio Type', 'AudioPlayer'),
-				'title'      => __( 'Audio Type (Required)', 'AudioPlayer' ),
-				'shortexp'      => __( 'You can choose from Local, SoundCloud and Podcast.', 'AudioPlayer' ),
-				'exp'      => __( 'Mixed sources is not recommended but is possible!', 'AudioPlayer' )
-			),
+				array(
+					'id'  => 'single_ap_local_options',
+					'type' => 'group',
+					'name' => __('Local Audio Track', 'audio-player'),
+					'desc' => __('Details for Local Audio Track goes below.', 'audio-player'),
+					'cols' => 4,
+					'fields' => array(
+						array(
+							'id'  => 'single_ap_mp3',
+							'name'  => __( 'MP3 file', 'audio-player' ),
+							'type'   => 'file',
+							'desc'   => __( 'Upload your MP3 file', 'audio-player' ),
+						),
+						array(
+							'id'  => 'single_ap_ogg',
+							'name'  => __( 'OGG file', 'audio-player' ),
+							'type'   => 'file',
+							'desc'   => __( 'Upload your OGG file', 'audio-player' ),
 
-			'single_ap_local_options' => array(
-				'type' => 'multi_option',
-				'title' => __('Local Audio Track', 'AudioPlayer'),
-				'shortexp' => __('Details for Local Audio Track goes here.', 'AudioPlayer'),
-				'selectvalues' => array(
-
-					'single_ap_mp3'  => array(
-						'inputlabel'  => __( 'MP3 file', 'AudioPlayer' ),
-						'type'   => 'text',
-						'title'   => __( 'Link to local files', 'AudioPlayer' ),
-						'shortexp'   => __( 'Use the Wordpress Media Uploader and copy links to these fields.', 'AudioPlayer' )
-					),
-
-					'single_ap_ogg'  => array(
-						'inputlabel'  => __( 'OGG file', 'AudioPlayer' ),
-						'type'   => 'text',
-					),
-
-					'single_ap_button_link'  => array(
-						'title' => __('Button options', 'AudioPlayer'),
-						'shortexp' => __('Details for the button goes here', 'AudioPlayer'),
-						'inputlabel'  => __( 'Button links to...', 'AudioPlayer' ),
-						'type'   => 'text',
-					),
-
-					'single_ap_button_text'  => array(
-						'inputlabel'  => __( 'Button text...', 'AudioPlayer' ),
-						'type'   => 'text',
-					),
-				),
-			),
-
-			'single_ap_soundcloud_options' => array(
-				'type' => 'multi_option',
-				'title' => __('SoundCloud Audio', 'AudioPlayer'),
-				'shortexp' => __('Details for SoundCloud Audio', 'AudioPlayer'),
-				'selectvalues' => array(
-					'single_ap_soundcloud'  => array(
-						'inputlabel'  => __( 'Link to SoundCloud...', 'AudioPlayer' ),
-						'type'   => 'text',
-						'title'   => __( 'SoundCloud link', 'AudioPlayer' ),
-						'shortexp'   => __( 'Details for SoundCloud Audio goes here. (Remember to input your SoundCloud API key in the Section Options)', 'AudioPlayer' )
+						),
+						array(
+							'id'  => 'single_ap_button_link',
+							'name'  => __( 'Button links to...', 'audio-player' ),
+							'type'   => 'text_url',
+						),
+						array(
+							'id'  => 'single_ap_button_text',
+							'name'  => __( 'Button text...', 'audio-player' ),
+							'type'   => 'text',
+						),
 					),
 				),
-			),
-
-			'single_ap_podcast_options' => array(
-				'type' => 'multi_option',
-				'title' => __('Podcast Audio', 'AudioPlayer'),
-				'shortexp' => __('Details for Podcast Audio', 'AudioPlayer'),
-				'selectvalues' => array(
-					'single_ap_podcast'  => array(
-						'inputlabel'  => __( 'Link to Podcast...', 'AudioPlayer' ),
-						'type'   => 'text',
-						'title'   => __( 'Podcast link', 'AudioPlayer' ),
-						'shortexp'   => __( 'Details for Podcast Audio goes here.</br>If your playlist appear blank and the player does not play anything, then you did not type in a valid podcast link. A podcast is NOT a MP3 file, but for example a .xml file like this: "http://feeds.feedburner.com/dumbassguide?format=xml"', 'AudioPlayer' )
+				array(
+					'id'  => 'single_ap_soundcloud_options',
+					'type' => 'group',
+					'name' => __('SoundCloud Audio', 'audio-player'),
+					'desc' => __('Details for SoundCload Audio Track goes below.', 'audio-player'),
+					'cols' => 4,
+					'fields' => array(
+						array(
+							'id'  => 'single_ap_soundcloud',
+							'name'  => __( 'Link to SoundCloud Track or Playlist', 'audio-player' ),
+							'type'   => 'text_url',
+						),
+					),
+				),
+				array(
+					'id'  => 'single_ap_podcast_options',
+					'type' => 'group',
+					'name' => __('Podcast Audio', 'audio-player'),
+					'desc' => __('Details for Podcast goes below.', 'audio-player'),
+					'cols' => 4,
+					'fields' => array(
+						array(
+							'id'  => 'single_ap_podcast',
+							'name'  => __( 'Link to podcast...', 'audio-player' ),
+							'type'   => 'text_url',
+							'desc' => __( 'Details for Podcast Audio goes here.</br>If your playlist appear blank and the player does not play anything, then you did not type in a valid podcast link. A podcast is NOT a MP3 file, but for example a .xml file like this: "http://feeds.feedburner.com/dumbassguide?format=xml"', 'audio-player' ),
+						),
 					),
 				),
 			),
+	    );
 
-//			'single_ap_directions'	=> array(
-//				'type'		=> '',
-//				'title'	=> __('<strong style="display:block;font-size:16px;color:#eaeaea;text-shadow:0 1px 0 black;padding:7px 7px 5px;background:#333;margin-top:5px;border-radius:3px;border:1px solid white;letter-spacing:0.1em;box-shadow:inset 0 0 3px black;">HOW TO USE:</strong>', 'AudioPlayer'),
-//				'shortexp'   => __('', 'AudioPlayer'),
-//			),
-		);
-
-		$post_types = array($this->id);
-
-		$type_metapanel_settings = array(
-			'id'		=> 'audioplayer-metapanel',
-			'name'	=> 'Single Audio Track Options',
-			'posttype'  => $post_types,
-		);
-
-		global $p_meta_panel;
-
-		$p_meta_panel =  new PageLinesMetaPanel( $type_metapanel_settings );
-
-		$type_metatab_settings = array(
-			'id'		=> 'audioplayer-type-metatab',
-			'name'	=> 'Single Audio Track Options',
-			'icon'	=> $this->icon
-		);
-
-		$p_meta_panel->register_tab( $type_metatab_settings, $type_meta_array );
+	    return $meta_boxes;
 
 	}
 

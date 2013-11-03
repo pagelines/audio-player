@@ -378,52 +378,42 @@ class AudioPlayer extends PageLinesSection {
 
 		$title = ( get_the_title( $post->ID ) ) ? get_the_title( $post->ID ) : 'Audio Track has not title' ;
 
+		if(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
+			$mp3 = $single_ap_local_options['single_ap_mp3'];
+		}
 		if ( get_post_meta( $post->ID,'single_ap_mp3' ) ) {
 			$mp3 = get_post_meta( $post->ID,'single_ap_mp3' );
-		} elseif(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
-			$mp3 = $single_ap_local_options['single_ap_mp3'];
-		} else {
-			$mp3 = '';
 		}
 
+		if(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
+			$ogg = $single_ap_local_options['single_ap_ogg'];
+		}
 		if ( get_post_meta( $post->ID,'single_ap_ogg' ) ) {
 			$ogg = get_post_meta( $post->ID,'single_ap_ogg' );
-		} elseif(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
-			$ogg = $single_ap_local_options['single_ap_ogg'];
-		} else {
-			$ogg = '';
 		}
-
+		if(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
+			$link = $single_ap_local_options['single_ap_button_link'];
+		}
 		if ( get_post_meta( $post->ID,'single_ap_button_link' ) ) {
 			$link = get_post_meta( $post->ID,'single_ap_button_link' );
-		} elseif(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
-			$link = $single_ap_local_options['single_ap_button_link'];
-		} else {
-			$link = '';
 		}
-
+		if(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
+			$link_text = $single_ap_local_options['single_ap_button_text'];
+		}
 		if ( get_post_meta( $post->ID,'single_ap_button_text' ) ) {
 			$link_text = get_post_meta( $post->ID,'single_ap_button_text' );
-		} elseif(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
-			$link_text = $single_ap_local_options['single_ap_button_text'];
-		} else {
-			$link_text = '';
 		}
 		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud_array'] ) ) {
 			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud_array'];
 		}
-		elseif ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
+		if ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
 			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
-		} else {
-			$soundcloud = '';
 		}
 		if(! empty( $single_ap_podcast_options['single_ap_podcast_array'] ) ) {
 			$podcast = $single_ap_podcast_options['single_ap_podcast_array'];
 		}
-		elseif ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
+		if ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
 			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
-		} else {
-			$podcast = '';
 		}
 
 		if ( is_array($type_array) ) {

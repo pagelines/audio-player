@@ -376,44 +376,58 @@ class AudioPlayer extends PageLinesSection {
 
 		$type_array = get_post_meta( $post->ID,'single_ap_type' );
 
+		$mp3_array = get_post_meta( $post->ID,'single_ap_mp3' );
+
+		$link_array = get_post_meta( $post->ID,'single_ap_button_link' );
+
+		$link_text_array = get_post_meta( $post->ID,'single_ap_button_text' );
+
+		$soundcloud_array = get_post_meta( $post->ID,'single_ap_soundcloud' );
+
+		$podcast_array = get_post_meta( $post->ID,'single_ap_podcast' );
+
 		$title = ( get_the_title( $post->ID ) ) ? get_the_title( $post->ID ) : 'Audio Track has not title' ;
 
 		if(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
 			$mp3 = $single_ap_local_options['single_ap_mp3'];
 		}
-		if ( get_post_meta( $post->ID,'single_ap_mp3' ) ) {
-			$mp3 = get_post_meta( $post->ID,'single_ap_mp3' );
+		if ( $mp3_array['0'] ) {
+			$mp3 = $mp3_array['0'];
 		}
 
 		if(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
 			$ogg = $single_ap_local_options['single_ap_ogg'];
 		}
-		if ( get_post_meta( $post->ID,'single_ap_ogg' ) ) {
-			$ogg = get_post_meta( $post->ID,'single_ap_ogg' );
+		if ( $ogg_array['0'] ) {
+			$ogg = $ogg_array['0'];
 		}
+
 		if(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
 			$link = $single_ap_local_options['single_ap_button_link'];
 		}
-		if ( get_post_meta( $post->ID,'single_ap_button_link' ) ) {
-			$link = get_post_meta( $post->ID,'single_ap_button_link' );
+		if ( $link_array['0'] ) {
+			$link = $link_array['0'];
 		}
+
 		if(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
 			$link_text = $single_ap_local_options['single_ap_button_text'];
 		}
-		if ( get_post_meta( $post->ID,'single_ap_button_text' ) ) {
-			$link_text = get_post_meta( $post->ID,'single_ap_button_text' );
+		if ( $link_text_array['0'] ) {
+			$link_text = $link_text_array['0'];
 		}
-		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud_array'] ) ) {
-			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud_array'];
+
+		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
+			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
 		}
-		if ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
-			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
+		if ( $soundcloud_array['0'] ) {
+			$soundcloud = $soundcloud_array['0'];
 		}
-		if(! empty( $single_ap_podcast_options['single_ap_podcast_array'] ) ) {
-			$podcast = $single_ap_podcast_options['single_ap_podcast_array'];
+
+		if(! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
+			$podcast = $single_ap_podcast_options['single_ap_podcast'];
 		}
-		if ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
-			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
+		if ( $podcast_array['0'] ) {
+			$podcast = $podcast_array['0'];
 		}
 
 		if ( is_array($type_array) ) {

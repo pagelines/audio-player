@@ -380,7 +380,7 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_mp3' ) ) {
 			$mp3 = get_post_meta( $post->ID,'single_ap_mp3' );
-		} elseif( isset( $single_ap_local_options['single_ap_mp3'] ) ) {
+		} elseif(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
 			$mp3 = $single_ap_local_options['single_ap_mp3'];
 		} else {
 			$mp3 = '';
@@ -388,7 +388,7 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_ogg' ) ) {
 			$ogg = get_post_meta( $post->ID,'single_ap_ogg' );
-		} elseif( isset( $single_ap_local_options['single_ap_ogg'] ) ) {
+		} elseif(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
 			$ogg = $single_ap_local_options['single_ap_ogg'];
 		} else {
 			$ogg = '';
@@ -396,7 +396,7 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_button_link' ) ) {
 			$link = get_post_meta( $post->ID,'single_ap_button_link' );
-		} elseif( isset( $single_ap_local_options['single_ap_button_link'] ) ) {
+		} elseif(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
 			$link = $single_ap_local_options['single_ap_button_link'];
 		} else {
 			$link = '';
@@ -404,7 +404,7 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_button_text' ) ) {
 			$link_text = get_post_meta( $post->ID,'single_ap_button_text' );
-		} elseif( isset( $single_ap_local_options['single_ap_button_text'] ) ) {
+		} elseif(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
 			$link_text = $single_ap_local_options['single_ap_button_text'];
 		} else {
 			$link_text = '';
@@ -412,7 +412,7 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_soundcloud' ) ) {
 			$soundcloud = get_post_meta( $post->ID,'single_ap_soundcloud' );
-		} elseif( isset( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
+		} elseif(! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
 			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
 		} else {
 			$soundcloud = '';
@@ -420,7 +420,7 @@ class AudioPlayer extends PageLinesSection {
 
 		if ( get_post_meta( $post->ID,'single_ap_podcast' ) ) {
 			$podcast = get_post_meta( $post->ID,'single_ap_podcast' );
-		} elseif( isset( $single_ap_podcast_options['single_ap_podcast'] ) ) {
+		} elseif(! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
 			$podcast = $single_ap_podcast_options['single_ap_podcast'];
 		} else {
 			$podcast = '';
@@ -438,7 +438,7 @@ class AudioPlayer extends PageLinesSection {
 
 		plprint($single_ap_podcast_options);
 
-		plprint($single_ap_soundcloud_options);
+		plprint($soundcloud);
 
 		?>
 

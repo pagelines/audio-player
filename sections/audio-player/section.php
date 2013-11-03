@@ -646,7 +646,7 @@ class AudioPlayer extends PageLinesSection {
 					'cols' => 4,
 					'fields' => array(
 						array(
-							'id'  => 'single_ap_soundcloud_array',
+							'id'  => 'single_ap_soundcloud',
 							'name'  => __( 'Link to SoundCloud Track or Playlist', 'audio-player' ),
 							'type'   => 'text_url',
 						),
@@ -660,7 +660,7 @@ class AudioPlayer extends PageLinesSection {
 					'cols' => 4,
 					'fields' => array(
 						array(
-							'id'  => 'single_ap_podcast_array',
+							'id'  => 'single_ap_podcast',
 							'name'  => __( 'Link to podcast...', 'audio-player' ),
 							'type'   => 'text_url',
 							'desc' => __( 'Details for Podcast Audio goes here.</br>If your playlist appear blank and the player does not play anything, then you did not type in a valid podcast link. A podcast is NOT a MP3 file, but for example a .xml file like this: "http://feeds.feedburner.com/dumbassguide?format=xml"', 'audio-player' ),

@@ -388,45 +388,45 @@ class AudioPlayer extends PageLinesSection {
 
 		$title = ( get_the_title( $post->ID ) ) ? get_the_title( $post->ID ) : 'Audio Track has not title' ;
 
-		if ( $mp3_array['0'] ) {
+		if (! empty( $mp3_array['0'] ) ) {
 			$mp3 = $mp3_array['0'];
 		}
-		if(! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
+		if (! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
 			$mp3 = $single_ap_local_options['single_ap_mp3'];
 		}
 
-		if ( $ogg_array['0'] ) {
+		if (! empty( $ogg_array['0'] ) ) {
 			$ogg = $ogg_array['0'];
 		}
-		if(! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
+		if (! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
 			$ogg = $single_ap_local_options['single_ap_ogg'];
 		}
 
-		if ( $link_array['0'] ) {
+		if (! empty( $link_array['0'] ) ) {
 			$link = $link_array['0'];
 		}
-		if(! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
+		if (! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
 			$link = $single_ap_local_options['single_ap_button_link'];
 		}
 
-		if ( $link_text_array['0'] ) {
+		if (! empty( $link_text_array['0'] ) ) {
 			$link_text = $link_text_array['0'];
 		}
-		if(! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
+		if (! empty( $single_ap_local_options['single_ap_button_text'] ) ) {
 			$link_text = $single_ap_local_options['single_ap_button_text'];
 		}
 
-		if ( $soundcloud_array['0'] ) {
+		if (! empty( $soundcloud_array['0'] ) ) {
 			$soundcloud = $soundcloud_array['0'];
 		}
-		if(! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
+		if (! empty( $single_ap_soundcloud_options['single_ap_soundcloud'] ) ) {
 			$soundcloud = $single_ap_soundcloud_options['single_ap_soundcloud'];
 		}
 
-		if ( $podcast_array['0'] ) {
+		if (! empty( $podcast_array['0'] ) ) {
 			$podcast = $podcast_array['0'];
 		}
-		if(! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
+		if (! empty( $single_ap_podcast_options['single_ap_podcast'] ) ) {
 			$podcast = $single_ap_podcast_options['single_ap_podcast'];
 		}
 
@@ -487,9 +487,9 @@ class AudioPlayer extends PageLinesSection {
 			</br></br>
 			<strong>1.</strong> Go to Wordpress backend and create a new Audio Track. </br></br>
 			<strong>2.</strong> Input Title, Audio Type, and options for the selected Audio Track. </br></br>
-			<strong>3.</strong> Choose Categories for your Folio . </br></br>
-			<strong>4.</strong> Go back to Folio\'s Section options and choose which category to show. Here you can also set the thumbnail height.
-			</br></br>
+			<strong>3.</strong> Enter the slug of your playlist for example "my-awesome-playlist". </br></br>
+			<strong>4.</strong> Write some text for the description and upload an image. </br></br>
+			<strong>5.</strong> Hit publish and refresh to see the changes. </br></br>
 			<div class="row zmb">
 				<div class="span6 tac zmb">
 					<a class="btn btn-info" href="http://forum.pagelines.com/71-products-by-aleksander-hansson/" target="_blank" style="padding:4px 0 4px;width:100%"><i class="icon-ambulance"></i>          Forum</a>
@@ -506,7 +506,7 @@ class AudioPlayer extends PageLinesSection {
 		', 'audio-player' );
 
 		$options[] = array(
-			'key' => 'folio_help',
+			'key' => 'ap_help',
 			'type'     => 'template',
 			'template'      => do_shortcode( $how_to_use ),
 			'title' =>__( 'How to use:', 'audio-player' ) ,
@@ -520,9 +520,8 @@ class AudioPlayer extends PageLinesSection {
 
 				array(
 					'key' => 'ap_playlist_select',
-					'type' 			=> 'select_taxonomy',
-					'post_type'	=> $this->ptID,
-					'label'	=> __( 'Playlist To Show', 'audio-player' ),
+					'type' 	=> 'text',
+					'label'	=> __( 'Input the slug of the playlist here.', 'audio-player' ),
 				),
 
 				array(

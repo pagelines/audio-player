@@ -37,17 +37,40 @@ class AudioPlayer extends PageLinesSection {
 
 	function section_scripts() {
 
+		wp_enqueue_script( 'ah-ap-swfobject', $this->base_url.'/js/swfobject.js' );
+
 		wp_enqueue_script( 'jquery' );
 
-		wp_enqueue_script( 'jquery-mousewheel', $this->base_url.'/js/jquery.mousewheel.min.js' );
+		wp_enqueue_script( 'ah-ap-jquery-ui-custom', $this->base_url.'/js/jquery-ui-1.10.3.custom.min.js' );
 
-		wp_enqueue_script( 'soundmanager2-nodebug', $this->base_url.'/js/soundmanager2-nodebug-jsmin.js' );
+		wp_enqueue_script( 'ah-ap-jquery-touch-punch', $this->base_url.'/js/jquery.ui.touch-punch.min.js' );
 
-		wp_enqueue_script( 'jquery-html5audio', $this->base_url.'/js/jquery.html5audio.js' );
+		wp_enqueue_script( 'ah-ap-jquery-mousewheel', $this->base_url.'/js/jquery.mousewheel.min.js' );
 
-		wp_enqueue_script( 'jquery-apPlaylistManager', $this->base_url.'/js/jquery.apPlaylistManager.min.js' );
+		wp_enqueue_script( 'ah-ap-jquery-jscrollpane', $this->base_url.'/js/jquery.jscrollpane.min.js' );
 
-		wp_enqueue_script( 'jquery-apTextScroller', $this->base_url.'/js/jquery.apTextScroller.min.js' );
+		wp_enqueue_script( 'ah-ap-jquery-selectbox-0.2', $this->base_url.'/js/jquery.selectbox-0.2.js' );
+
+		wp_enqueue_script( 'ah-ap-jquery-html5audio', $this->base_url.'/js/jquery.html5audio.min.js' );
+
+		wp_enqueue_script( 'ah-ap-jquery-html5audio-func', $this->base_url.'/js/jquery.html5audio.func.js' );
+
+		wp_enqueue_script( 'ah-ap-jquery-apPlaylistManager', $this->base_url.'/js/jquery.apPlaylistManager.min.js' );
+
+		wp_enqueue_script( 'ah-ap-jquery-apTextScroller', $this->base_url.'/js/jquery.apTextScroller.min.js' );
+
+	//	<script type="text/javascript" src="js/swfobject.js"></script><!-- flash backup --> 
+    //  <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    //    <script type="text/javascript" src="js/jquery-ui-1.10.3.custom.min.js"></script><!-- jquery ui sortable/draggable -->
+    //    <script type="text/javascript" src="js/jquery.ui.touch-punch.min.js"></script><!-- mobile drag/sort -->
+    //    <!--[if lte IE 9 ]><script type="text/javascript" src="js/jquery.XDomainRequest.js"/><![endif]--><!-- ofm ie9 and below fix -->
+    //    <script type="text/javascript" src="js/jquery.mousewheel.min.js"></script><!-- scroll in playlist -->
+    //    <script type="text/javascript" src="js/jquery.jscrollpane.min.js"></script><!-- scroll in playlist -->
+    //    <script type="text/javascript" src="js/jquery.selectbox-0.2.js"></script><!-- playlist selector dropdown -->
+    //    <script type="text/javascript" src="http://www.youtube.com/player_api"></script><!-- youtube -->
+    //    <script type="text/javascript" src="js/jquery.apYoutubePlayer.min.js"></script><!-- youtube -->
+    //    <script type="text/javascript" src="js/jquery.apPlaylistManager.min.js"></script>
+    //    <script type="text/javascript" src="js/jquery.apTextScroller.min.js"></
 
 	}
 
@@ -66,55 +89,86 @@ class AudioPlayer extends PageLinesSection {
 
 				<script type="text/javascript">
 
-				jQuery(document).ready(function($) {
-
-					/* CALLBACKS */
-
-					// SETTINGS
-
 					var ap_settings = {
-						/* playlistHolder: dom elements which holds list of playlists */
-						playlistHolder: '#playlist_list<?php echo $prefix; ?>',
-						/* activePlaylist: set active playlist that will be loaded on beginning.
-						Leave empty for none like this: activePlaylist: '' */
-						activePlaylist: '#playlist<?php echo $prefix; ?>',
-						/* sound_id: unique string for soundmanager sound id (if multiple player instances were used, then strings need to be different) */
+						/* useOnlyMp3Format: true/false (set to true, and on browsers than do not support mp3, flash will be used to play mp3. Also set to true if you plan on using podcast, soundcloud, youtube, ofm) */
+						useOnlyMp3Format: true,
+						/* sound_id: unique string for player identification (if multiple player instances were used, then strings need to be different!) */
 						sound_id: 'sound_id<?php echo $prefix; ?>',
+						
+						/* playlistList: dom elements which holds list of playlists */
+						playlistList: '#playlist_list<?php echo $prefix; ?>',
+						/* activePlaylist: set active playlist that will be loaded on beginning. 
+						param1: hidden (boolean) true/false (visible/hidden playlist)
+						param2: id (pass element 'id' from the dom)
+						Leave empty for no playlist loaded at start like this: activePlaylist: '' */
+						activePlaylist: {hidden: false, id: '#playlist<?php echo $prefix; ?>'},
 						/* activeItem: active item to start with when playlist is loaded (0 = first, 1 = second, 2 = third... -1 = none) */
 						activeItem: 0,
-						/* soundcloudApiKey: If you want to use SoundCloud music, register you own api key here for free:
+						
+						/* autoOpenPlayerInPopup: true/false. Auto open player in popup (removes player in parent window when player in popup opens) */
+						autoOpenPlayerInPopup: false,
+						/* autoUpdateWindowData: true/false. Auto update data between parent window and popup window (current (last) playlist, active item, last volume) */
+						autoUpdateWindowData: true,
+						
+						/* soundcloudApiKey: If you want to use SoundCloud music, register you own api key here for free: 
 						'http://soundcloud.com/you/apps/new' and enter Client ID */
 						soundcloudApiKey: '<?php echo $soundcloud_api; ?>',
+						/* soundcloud_result_limit: max number of results to retrieve from soundcloud. BEWARE! Some results may contain thousands of songs so keep this in mind!! */
+						soundcloud_result_limit: 5,
+						
+						/* podcast_result_limit: max number of results to retrieve from podcast. 250 = max possible results by google api feed. */
+						podcast_result_limit: 5,
+						/* yt_playlist_result_limit: max number of results to retrieve from youtube playlist. 200 = max amount youtube playlist can have. */
+						yt_playlist_result_limit: 5,
+						/* ofm_result_limit: max number of results to retrieve from official.fm. */
+						ofm_result_limit: 5,
 
 						/*defaultVolume: 0-1 (Irrelevant on ios mobile) */
 						defaultVolume:0.5,
 						/*autoPlay: true/false (false on mobile by default) */
-						autoPlay:false,
+						autoPlay:true,
 						/*autoLoad: true/false (auto start sound load) */
-						autoLoad:true,
+						autoLoad:false,
 						/*randomPlay: true/false */
 						randomPlay:false,
 						/*loopingOn: true/false (loop on the end of the playlist) */
 						loopingOn:true,
-
+						
+						/* usePlaylistRollovers: true/false. Use rollovers on playlist items (mouseenter, mouseleave + callbacks) */
+						usePlaylistRollovers: false,
+						/* playlistItemContent: title/thumb/all. Auto create titles or thumbnails in playlist items, or both. */
+						playlistItemContent: 'all',
+						/* useNumbersInPlaylist: true/false. Prepend numbers in playlist items. */
+						useNumbersInPlaylist: false,
+						/* titleSeparator: String to append between song number and title. */
+						titleSeparator: '.&nbsp;',
+						
 						/* autoSetSongTitle: true/false. Auto set song title in 'player_mediaName'. */
 						autoSetSongTitle: true,
-
+						
 						/* useSongNameScroll: true/false. Use song name scrolling. */
 						useSongNameScroll: true,
 						/* scrollSpeed: speed of the scroll (number higher than zero). */
 						scrollSpeed: 1,
 						/* scrollSeparator: String to append between scrolling song name. */
 						scrollSeparator: '&nbsp;&#42;&#42;&#42;&nbsp;',
-
+						
 						/* mediaTimeSeparator: String between current and total song time. */
 						mediaTimeSeparator: '&nbsp;-&nbsp;',
+						
+						/* useVolumeTooltip: true/false. use tooltip over volume seekbar */
+						useVolumeTooltip: true,
+						
+						/* useSeekbarTooltip: true/false. use tooltip over progress seekbar */
+						useSeekbarTooltip: true,
 						/* seekTooltipSeparator: String between current and total song position, for progress tooltip. */
 						seekTooltipSeparator: '&nbsp;/&nbsp;',
-
+						
 						/* defaultArtistData: Default text for song media name. */
 						defaultArtistData: 'Artist&nbsp;Name&nbsp;-&nbsp;Artist&nbsp;Title',
-
+						
+						/* useBtnRollovers: true/false. Use rollovers on buttons */
+						useBtnRollovers: true,
 						/* buttonsUrl: url of the buttons for normal and rollover state */
 						buttonsUrl: {prev: "<?php printf('%sbackwards.png', $buttons_path ); ?>", prevOn: "<?php printf('%sbackwardsOn.png', $buttons_path ); ?>",
 									next: "<?php printf('%sforward.png', $buttons_path ); ?>", nextOn: "<?php printf('%sforwardOn.png', $buttons_path ); ?>",
@@ -124,67 +178,40 @@ class AudioPlayer extends PageLinesSection {
 									mute: "<?php printf('%smute.png', $buttons_path ); ?>", muteOn: "<?php printf('%smuteOn.png', $buttons_path ); ?>",
 									loop: "<?php printf('%srepeat.png', $buttons_path ); ?>", loopOn: "<?php printf('%srepeatOn.png', $buttons_path ); ?>",
 									shuffle: "<?php printf('%srandom.png', $buttons_path ); ?>", shuffleOn: "<?php printf('%srandomOn.png', $buttons_path ); ?>"},
-						/* useAlertMessaging: Alert error messages to user (true / false). */
-						useAlertMessaging: true,
-
+						/* useAlertMessaging: true/false. Alert error messages to user */
+						useAlertMessaging: false,
+						
 						/* activatePlaylistScroll: true/false. activate jScrollPane. */
-						activatePlaylistScroll: false
+						activatePlaylistScroll: false,
+						/* playlistScrollOrientation: vertical/horizontal. */
+						playlistScrollOrientation: 'horizontal',
+						
+						/* sortablePlaylistItems: true/false. Make playlist items sortable */
+						sortablePlaylistItems: false,
+						/* useRemoveBtnInTracks: true/false. Create remove buttons in playlist items for removing tracks. */
+						useRemoveBtnInTracks: false,
+						
+						/* autoReuseMailForDownload: true/false. download backup for ios, save email after client first enters email address and auto send all emails to the same address */
+						autoReuseMailForDownload: true,
+						
+						/* useKeyboardNavigation: false/false. Use keyboard navigation for music (space=toggle audio, left arrow=previous media, right arrow=next media, m=toggle volume) */
+						useKeyboardNavigation: false
 					};
 
-					//sound manager settings (http://www.schillmania.com/projects/soundmanager2/)
-					soundManager.setup({
-						url: 'swf/', // path to SoundManager2 SWF files
-						allowScriptAccess: 'always',
-						debugMode: false,
-						noSWFCache: true,
-						useConsole: false,
-						waitForWindowLoad: true,
-						flashVersion: 9,
-						useFlashBlock: true,
-						preferFlash: false,
-						useHTML5Audio: true
+					jQuery(document).ready(function($) {
+
+						var hap_player1, hap_players = [hap_player1];
+							
+							jsReady = true;
+								
+							var dataArr = [{holder: $('.componentWrapper<?php echo $prefix; ?>'), settings:ap_settings}];
+									
+							checkFlash(dataArr);	
+							
+							//init component
+							hap_players[0] = $('.componentWrapper<?php echo $prefix; ?>').html5audio(ap_settings);
+							
 					});
-
-					var audio = document.createElement('audio'), mp3Support, oggSupport;
-					if (audio.canPlayType) {
-						mp3Support = !!audio.canPlayType && "" != audio.canPlayType('audio/mpeg');//setting this will use html5 audio on all html5 audio capable browsers ('modern browsers'), flash on the rest ('older browsers')
-					//mp3Support=true;//setting this will use html5 audio on modern browsers that support 'mp3', flash on the rest of modern browsers that support 'ogv' like firefox and opera, and of course flash on the rest ('older browsers') (USE THIS SETTING WHEN USING PODCAST AND SOUNDCLOUD!)
-						oggSupport = !!audio.canPlayType && "" != audio.canPlayType('audio/ogg; codecs="vorbis"');
-					}else{
-						//for IE<9
-						mp3Support = true;
-						oggSupport = false;
-					}
-					//console.log('mp3Support = ', mp3Support, ' , oggSupport = ', oggSupport);
-
-					soundManager.audioFormats = {
-						'mp3': {
-							'type': ['audio/mpeg; codecs="mp3"', 'audio/mpeg', 'audio/mp3', 'audio/MPA', 'audio/mpa-robust'],
-							'required': mp3Support
-						},
-						'mp4': {
-							'related': ['aac','m4a'],
-							'type': ['audio/mp4; codecs="mp4a.40.2"', 'audio/aac', 'audio/x-m4a', 'audio/MP4A-LATM', 'audio/mpeg4-generic'],
-							'required': false
-						},
-						'ogg': {
-							'type': ['audio/ogg; codecs=vorbis'],
-							'required': oggSupport
-						},
-						'wav': {
-							'type': ['audio/wav; codecs="1"', 'audio/wav', 'audio/wave', 'audio/x-wav'],
-							'required': false
-						}
-					};
-
-					//player instances
-					var player<?php echo $prefix; ?>;
-
-					//init component
-					player<?php echo $prefix; ?> = $('.componentWrapper<?php echo $prefix; ?>').html5audio(ap_settings);
-					ap_settings = null;
-
-				});
 
 				</script>
 			<?php
@@ -392,15 +419,17 @@ class AudioPlayer extends PageLinesSection {
 			$mp3 = $mp3_array['0'];
 		}
 		if (! empty( $single_ap_local_options['single_ap_mp3'] ) ) {
-			$mp3 = $single_ap_local_options['single_ap_mp3'];
+			$mp3 = wp_get_attachment_url( esc_html( $single_ap_local_options['single_ap_mp3'] ) );
 		}
 
 		if (! empty( $ogg_array['0'] ) ) {
 			$ogg = $ogg_array['0'];
 		}
 		if (! empty( $single_ap_local_options['single_ap_ogg'] ) ) {
-			$ogg = $single_ap_local_options['single_ap_ogg'];
+			$ogg = wp_get_attachment_url( esc_html( $single_ap_local_options['single_ap_ogg'] ) );
 		}
+
+		$link = '';
 
 		if (! empty( $link_array['0'] ) ) {
 			$link = $link_array['0'];
@@ -408,6 +437,8 @@ class AudioPlayer extends PageLinesSection {
 		if (! empty( $single_ap_local_options['single_ap_button_link'] ) ) {
 			$link = $single_ap_local_options['single_ap_button_link'];
 		}
+
+		$link_text = '';
 
 		if (! empty( $link_text_array['0'] ) ) {
 			$link_text = $link_text_array['0'];
@@ -448,17 +479,16 @@ class AudioPlayer extends PageLinesSection {
 
 					if ( $type == 'local' ) {
 						if ($mp3) {
-						printf( 'data-mp3Path="%s"', $mp3 );
+						printf( 'data-mp3="%s"', $mp3 );
 						}
 						if ($ogg) {
-							printf( 'data-oggPath="%s"', $ogg );
+							printf( 'data-ogg="%s"', $ogg );
 						}
 					} elseif ( $type == 'soundcloud' ) {
 						printf( 'data-path="%s"', $soundcloud );
 					} elseif ( $type == 'podcast' ) {
 						printf( 'data-path="%s"', $podcast );
 					}
-
 				?>
 			>
 				<?php

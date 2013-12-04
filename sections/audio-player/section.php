@@ -59,19 +59,6 @@ class AudioPlayer extends PageLinesSection {
 
 		wp_enqueue_script( 'ah-ap-jquery-apTextScroller', $this->base_url.'/js/jquery.apTextScroller.min.js' );
 
-	//	<script type="text/javascript" src="js/swfobject.js"></script><!-- flash backup --> 
-    //  <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
-    //    <script type="text/javascript" src="js/jquery-ui-1.10.3.custom.min.js"></script><!-- jquery ui sortable/draggable -->
-    //    <script type="text/javascript" src="js/jquery.ui.touch-punch.min.js"></script><!-- mobile drag/sort -->
-    //    <!--[if lte IE 9 ]><script type="text/javascript" src="js/jquery.XDomainRequest.js"/><![endif]--><!-- ofm ie9 and below fix -->
-    //    <script type="text/javascript" src="js/jquery.mousewheel.min.js"></script><!-- scroll in playlist -->
-    //    <script type="text/javascript" src="js/jquery.jscrollpane.min.js"></script><!-- scroll in playlist -->
-    //    <script type="text/javascript" src="js/jquery.selectbox-0.2.js"></script><!-- playlist selector dropdown -->
-    //    <script type="text/javascript" src="http://www.youtube.com/player_api"></script><!-- youtube -->
-    //    <script type="text/javascript" src="js/jquery.apYoutubePlayer.min.js"></script><!-- youtube -->
-    //    <script type="text/javascript" src="js/jquery.apPlaylistManager.min.js"></script>
-    //    <script type="text/javascript" src="js/jquery.apTextScroller.min.js"></
-
 	}
 
 
@@ -84,6 +71,9 @@ class AudioPlayer extends PageLinesSection {
 		$buttons_path = $this->base_url.'/img/';
 
 		$soundcloud_api = ( $this->opt( 'ap_soundcloud_api') ) ? $this->opt( 'ap_soundcloud_api' ) : '';
+
+		$autoplay = ( $this->opt( 'ap_autoplay') ) ? $this->opt( 'ap_autoplay' ) : 'false';
+
 
 			?>
 
@@ -114,7 +104,7 @@ class AudioPlayer extends PageLinesSection {
 						'http://soundcloud.com/you/apps/new' and enter Client ID */
 						soundcloudApiKey: '<?php echo $soundcloud_api; ?>',
 						/* soundcloud_result_limit: max number of results to retrieve from soundcloud. BEWARE! Some results may contain thousands of songs so keep this in mind!! */
-						soundcloud_result_limit: 5,
+						soundcloud_result_limit: 50,
 						
 						/* podcast_result_limit: max number of results to retrieve from podcast. 250 = max possible results by google api feed. */
 						podcast_result_limit: 5,
@@ -126,7 +116,7 @@ class AudioPlayer extends PageLinesSection {
 						/*defaultVolume: 0-1 (Irrelevant on ios mobile) */
 						defaultVolume:0.5,
 						/*autoPlay: true/false (false on mobile by default) */
-						autoPlay:true,
+						autoPlay:<?php echo $autoplay; ?>,
 						/*autoLoad: true/false (auto start sound load) */
 						autoLoad:false,
 						/*randomPlay: true/false */
@@ -484,6 +474,7 @@ class AudioPlayer extends PageLinesSection {
 						if ($ogg) {
 							printf( 'data-ogg="%s"', $ogg );
 						}
+						printf('data-title="%s"', $title);
 					} elseif ( $type == 'soundcloud' ) {
 						printf( 'data-path="%s"', $soundcloud );
 					} elseif ( $type == 'podcast' ) {
@@ -567,6 +558,17 @@ class AudioPlayer extends PageLinesSection {
 					'type'   => 'textarea',
 					'title'   => __( 'Playlist Description', 'audio-player' ),
 					'help'   => __( 'Type in your description of your playlist...', 'audio-player' )
+				),
+
+				array(
+					'key'		=> 'ap_autoplay',
+					'label'		=> __( 'Autoplay', 'audio-player' ),
+					'type' 			=> 'select',
+					'opts'		=> array(
+						true	 	=> array( 'name' => __( 'Yes', 'audio-player' ) ),
+						false		=> array( 'name' => __( 'No', 'audio-player' ) )
+					),
+					'default'		=> false,
 				),
 
 				array(

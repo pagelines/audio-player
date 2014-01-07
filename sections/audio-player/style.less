@@ -13,11 +13,20 @@
 	box-shadow: 0 0 @bo-shadow rgba(0,0,0,0.5);
 }
 
+.box-sizing (@type: border-box) {
+	-webkit-box-sizing: @type;
+	-moz-box-sizing:    @type;
+	box-sizing:         @type;
+}
+
 //Section LESS
 #audio-player, .section-audio-player {
 
 	.hap_thumb {
 		display:none
+	}
+	.hap_title p {
+		margin:0;
 	}
 
 	.ap_playlist_details {
@@ -54,7 +63,7 @@
 		}
 	}
 
-	#componentWrapper{
+	.componentWrapper{
 
 		.playerHolder{
 			top:0px;

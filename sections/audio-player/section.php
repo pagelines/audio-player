@@ -79,7 +79,7 @@ class AudioPlayer extends PageLinesSection {
 
 				<script type="text/javascript">
 
-					var ap_settings = {
+					var ap_settings<?php echo $prefix; ?> = {
 						/* useOnlyMp3Format: true/false (set to true, and on browsers than do not support mp3, flash will be used to play mp3. Also set to true if you plan on using podcast, soundcloud, youtube, ofm) */
 						useOnlyMp3Format: true,
 						/* sound_id: unique string for player identification (if multiple player instances were used, then strings need to be different!) */
@@ -188,18 +188,18 @@ class AudioPlayer extends PageLinesSection {
 						useKeyboardNavigation: false
 					};
 
-					jQuery(document).ready(function($) {
+					jQuery(document).ready(function() {
 
 						var hap_player1, hap_players = [hap_player1];
 							
 							jsReady = true;
 								
-							var dataArr = [{holder: $('.componentWrapper<?php echo $prefix; ?>'), settings:ap_settings}];
+							var dataArr = [{holder: jQuery('#componentWrapper<?php echo $prefix; ?>'), settings:ap_settings<?php echo $prefix; ?>}];
 									
 							checkFlash(dataArr);	
 							
 							//init component
-							hap_players[0] = $('.componentWrapper<?php echo $prefix; ?>').html5audio(ap_settings);
+							hap_players[0] = jQuery('#componentWrapper<?php echo $prefix; ?>').html5audio(ap_settings<?php echo $prefix; ?>);
 							
 					});
 
@@ -261,7 +261,7 @@ class AudioPlayer extends PageLinesSection {
 					}
 
 
-				printf('<div id="componentWrapper" class="span%s componentWrapper%s">', $playerspan, $prefix);
+				printf('<div id="componentWrapper%s" class="span%s componentWrapper">', $prefix, $playerspan);
 
 				?>
 
@@ -535,7 +535,7 @@ class AudioPlayer extends PageLinesSection {
 
 		$options[] = array(
 			'key' => 'ap_settings',
-			'title' => __( 'Folio Settings', 'audio-player' ),
+			'title' => __( 'Audio Player Settings', 'audio-player' ),
 			'type'	=> 'multi',
 			'opts'	=> array(
 

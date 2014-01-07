@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) || class_exists( 'AH_AudioPlayer_Plugin_Updater' ) )
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * @version 0.1.3
+ * @version 0.1.4
  * @author David Chandra Purnama <david@shellcreeper.com>
  * @link http://autohosted.com/
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
@@ -53,7 +53,7 @@ class AH_AudioPlayer_Plugin_Updater{
 			'key'         => '',
 			'dashboard'   => false,
 			'username'    => false,
-			'autohosted'  => 'plugin.0.1.3',
+			'autohosted'  => 'plugin.0.1.4',
 		);
 
 		/* merge configs and defaults */
@@ -88,53 +88,94 @@ class AH_AudioPlayer_Plugin_Updater{
 
 	/**
 	 * Disable request to wp.org plugin repository
+	 * this function is to remove update request data of this plugin to wp.org
+	 * so wordpress would not do update check for this plugin.
+	 *
 	 * @link http://markjaquith.wordpress.com/2009/12/14/excluding-your-plugin-or-theme-from-update-checks/
 	 * @since 0.1.2
 	 */
 	public function disable_wporg_request( $r, $url ){
 
-		/* If it's not a plugin request, bail early */
-		if ( 0 !== strpos( $url, 'http://api.wordpress.org/plugins/update-check' ) )
-			return $r;
+		/* WP.org plugin update check URL */
+		$wp_url_string = 'api.wordpress.org/plugins/update-check';
 
-		/* this plugin slug */
+		/* If it's not a plugin update check request, bail early */
+		if ( false === strpos( $url, $wp_url_string ) ){
+			return $r;
+		}
+
+		/* Get this plugin slug */
 		$plugin_slug = dirname( $this->config['base'] );
 
-		/* unserialize data */
-		$plugins = unserialize( $r['body']['plugins'] );
+		/* Get response body (json/serialize data) */
+		$r_body = wp_remote_retrieve_body( $r );
 
-		/* default value */
+		/* Get plugins request */
+		$r_plugins = '';
+		$r_plugins_json = false;
+		if( isset( $r_body['plugins'] ) ){
+
+			/* Check if data can be serialized */
+			if ( is_serialized( $r_body['plugins'] ) ){
+
+				/* unserialize data ( PRE WP 3.7 ) */
+				$r_plugins = @unserialize( $r_body['plugins'] );
+				$r_plugins = (array) $r_plugins; // convert object to array
+			}
+
+			/* if unserialize didn't work ( POST WP.3.7 using json ) */
+			else{
+				/* use json decode to make body request to array */
+				$r_plugins = json_decode( $r_body['plugins'], true );
+				$r_plugins_json = true;
+			}
+		}
+
+		/* this plugin */
 		$to_disable = '';
 
-		/* check if plugins object is set */
-		if  ( isset( $plugins->plugins ) ){
+		/* check if plugins request is not empty */
+		if  ( !empty( $r_plugins ) ){
 
-			$all_plugins = $plugins->plugins;
+			/* All plugins */
+			$all_plugins = $r_plugins['plugins'];
 
-			/* loop all plugins */
+			/* Loop all plugins */
 			foreach ( $all_plugins as $plugin_base => $plugin_data ){
 
-				/* only if the plugin have the same folder */
+				/* Only if the plugin have the same folder, because plugins can have different main file. */
 				if ( dirname( $plugin_base ) == $plugin_slug ){
 
 					/* get plugin to disable */
 					$to_disable = $plugin_base;
 				}
 			}
-		}
-		/* unset this plugin only */
-		if ( !empty( $to_disable ) )
-			unset( $plugins->plugins[ $to_disable ] );
 
-		/* serialize it back */
-		$r['body']['plugins'] = serialize( $plugins );
+			/* Unset this plugin only */
+			if ( !empty( $to_disable ) ){
+				unset(  $all_plugins[ $to_disable ] );
+			}
+
+			/* Merge plugins request back to request */
+			if ( true === $r_plugins_json ){ // json encode data
+				$r_plugins['plugins'] = $all_plugins;
+				$r['body']['plugins'] = json_encode( $r_plugins );
+			}
+			else{ // serialize data
+				$r_plugins['plugins'] = $all_plugins;
+				$r_plugins_object = (object) $r_plugins;
+				$r['body']['plugins'] = serialize( $r_plugins_object );
+			}
+		}
+
+		/* return the request */
 		return $r;
 	}
 
 
 	/**
 	 * Data needed in an array to make everything simple.
-	 *
+	 * 
 	 * @since 0.1.0
 	 * @return array
 	 */
@@ -188,7 +229,7 @@ class AH_AudioPlayer_Plugin_Updater{
 
 		/* User name / login */
 		$username = '';
-		if ( false !== $this->config['username'] && false === $this->config['dashboard'] )
+		if ( false !== $this->config['username'] && false === $this->config['dashboard'] ) 
 			$username = $this->config['username'];
 		if ( true === $this->config['username'] && true === $this->config['dashboard'] ){
 			$widget_id = 'ahp_' . $slug . '_activation_key';
@@ -231,7 +272,7 @@ class AH_AudioPlayer_Plugin_Updater{
 
 	/**
 	 * Check for plugin updates
-	 *
+	 * 
 	 * @since 0.1.0
 	 */
 	public function transient_update_plugins( $checked_data ) {
@@ -279,9 +320,10 @@ class AH_AudioPlayer_Plugin_Updater{
 		return $checked_data;
 	}
 
+
 	/**
 	 * Filter Plugin API
-	 *
+	 * 
 	 * @since 0.1.0
 	 */
 	public function plugins_api_result( $res, $action, $args ) {
@@ -291,8 +333,42 @@ class AH_AudioPlayer_Plugin_Updater{
 		/* Get needed data */
 		$updater_data = $this->updater_data();
 
+		/* Make sure $args is object */
+		if ( is_array($args) )
+			$args = (object)$args;
+
+		/* WP 3.7.1 get plugin slug.
+		----------------------------------- */
+		$plugin_slug = '';  /* default, empty */
+
+		/* Only if "slug" is not set yet */
+		if ( !isset( $args->slug ) ){
+
+			/* Get plugin "slug" from Plugin Info Iframe URL */
+			if ( isset( $_REQUEST['plugin'] ) ){
+				$plugin_slug = wp_unslash( $_REQUEST['plugin'] );
+			}
+
+			/* If it's not on plugin info iframe (e.g. update core page) */
+			else{
+
+				/* Check "$args" body request */
+				if ( isset( $args->body['request'] ) ){
+					$get_args_body = maybe_unserialize( $args->body['request'] );
+					if ( isset( $get_args_body->slug ) ){
+						$plugin_slug = $get_args_body->slug;
+					}
+				}
+			}
+		}
+
+		/* if "slug" is set, use it */
+		else{
+			$plugin_slug = $args->slug;
+		}
+
 		/* Get data only from current plugin, and only when call for "plugin_information" */
-		if ( isset( $args->slug ) && $args->slug == $updater_data['slug'] && $action == 'plugin_information' ){
+		if ( $plugin_slug == $updater_data['slug'] && $action == 'plugin_information' ){
 
 			/* Get data from server */
 			$remote_url = add_query_arg( array( 'plugin_repo' => $updater_data['repo_slug'], 'ahpr_info' => $updater_data['version'] ), $updater_data['repo_uri'] );
@@ -301,7 +377,7 @@ class AH_AudioPlayer_Plugin_Updater{
 
 			/* If error on retriving the data from repo */
 			if ( is_wp_error( $request ) ) {
-				$res = new WP_Error( 'plugins_api_failed', '<p>' . __( 'An Unexpected HTTP Error occurred during the API request.', 'text-domain' ) . '</p><p><a href="?" onclick="document.location.reload(); return false;">' . __( 'Try again', 'text-domain' ) . '</a></p>', $request->get_error_message() );
+				$res = new WP_Error( 'plugins_api_failed', '<p>' . __( 'An Unexpected HTTP Error occurred during the API request.', 'auto-hosted' ) . '</p><p><a href="?" onclick="document.location.reload(); return false;">' . __( 'Try again', 'auto-hosted' ) . '</a></p>', $request->get_error_message() );
 			}
 
 			/* If no error, construct the data */
@@ -342,8 +418,8 @@ class AH_AudioPlayer_Plugin_Updater{
 
 				/* If data is empty or not an object */
 				else{
-					$res = new WP_Error( 'plugins_api_failed', __( 'An unknown error occurred', 'text-domain' ), wp_remote_retrieve_body( $request ) );
-
+					$res = new WP_Error( 'plugins_api_failed', __( 'An unknown error occurred', 'auto-hosted' ), wp_remote_retrieve_body( $request ) );
+				
 				}
 			}
 		}
@@ -353,7 +429,7 @@ class AH_AudioPlayer_Plugin_Updater{
 
 	/**
 	 * Make sure plugin is installed in correct folder
-	 *
+	 * 
 	 * @since 0.1.0
 	 */
 	public function upgrader_post_install( $true, $hook_extra, $result ) {
@@ -378,8 +454,8 @@ class AH_AudioPlayer_Plugin_Updater{
 				$activate = activate_plugin( trailingslashit( WP_PLUGIN_DIR ) . $plugin_base );
 
 				/* Update message */
-				$fail = __( 'The plugin has been updated, but could not be reactivated. Please reactivate it manually.', 'text-domain' );
-				$success = __( 'Plugin reactivated successfully. ', 'text-domain' );
+				$fail = __( 'The plugin has been updated, but could not be reactivated. Please reactivate it manually.', 'auto-hosted' );
+				$success = __( 'Plugin reactivated successfully. ', 'auto-hosted' );
 				echo is_wp_error( $activate ) ? $fail : $success;
 			}
 		}
@@ -389,7 +465,7 @@ class AH_AudioPlayer_Plugin_Updater{
 
 	/**
 	 * Add Dashboard Widget
-	 *
+	 * 
 	 * @since 0.1.0
 	 */
 	public function add_dashboard_widget() {
@@ -401,7 +477,7 @@ class AH_AudioPlayer_Plugin_Updater{
 		$widget_id = 'ahp_' . $updater_data['slug'] . '_activation_key';
 
 		/* Widget name */
-		$widget_name = $updater_data['name'] . __( ' Plugin Updates', 'text-domain' );
+		$widget_name = $updater_data['name'] . __( ' Plugin Updates', 'auto-hosted' );
 
 		/* role check, in default install only administrator have this cap */
 		if ( current_user_can( 'update_plugins' ) ) {
@@ -409,13 +485,13 @@ class AH_AudioPlayer_Plugin_Updater{
 			/* add dashboard widget for acivation key */
 			wp_add_dashboard_widget( $widget_id, $widget_name, array( &$this, 'dashboard_widget_callback' ), array( &$this, 'dashboard_widget_control_callback' ) );
 		}
-
+	
 	}
 
 
 	/**
 	 * Dashboard Widget Callback
-	 *
+	 * 
 	 * @since 0.1.0
 	 */
 	public function dashboard_widget_callback() {
@@ -440,45 +516,45 @@ class AH_AudioPlayer_Plugin_Updater{
 
 				/* username */
 				$username = isset( $widget_option['username'] ) ? $widget_option['username'] : '';
-				echo '<p>'. __( 'Username: ', 'text-domain' ) . '<code>' . $username . '</code></p>';
+				echo '<p>'. __( 'Username: ', 'auto-hosted' ) . '<code>' . $username . '</code></p>';
 
 				/* activation key input */
 				$key = isset( $widget_option['key'] ) ? $widget_option['key'] : '' ;
-				echo '<p>'. __( 'Email: ', 'text-domain' ) . '<code>' . $key . '</code></p>';
+				echo '<p>'. __( 'Email: ', 'auto-hosted' ) . '<code>' . $key . '</code></p>';
 			}
 			else{
 
 				/* activation key input */
 				$key = isset( $widget_option['key'] ) ? $widget_option['key'] : '' ;
-				echo '<p>'. __( 'Key: ', 'text-domain' ) . '<code>' . $key . '</code></p>';
+				echo '<p>'. __( 'Key: ', 'auto-hosted' ) . '<code>' . $key . '</code></p>';
 			}
 
 
 			/* if key status is valid */
 			if ( $widget_option['status'] == 'valid' ){
-				_e( '<p>Your plugin update is <span style="color:green">active</span></p>', 'text-domain' );
+				_e( '<p>Your plugin update is <span style="color:green">active</span></p>', 'auto-hosted' );
 			}
 			/* if key is not valid */
 			elseif( $widget_option['status'] == 'invalid' ){
-				_e( '<p>Your input is <span style="color:red">not valid</span>, automatic updates is <span style="color:red">not active</span>.</p>', 'text-domain' );
-				echo '<p><a href="' . $edit_url . '" class="button-primary">' . __( 'Edit Key', 'text-domain' ) . '</a></p>';
+				_e( '<p>Your input is <span style="color:red">not valid</span>, automatic updates is <span style="color:red">not active</span>.</p>', 'auto-hosted' );
+				echo '<p><a href="' . $edit_url . '" class="button-primary">' . __( 'Edit Key', 'auto-hosted' ) . '</a></p>';
 			}
 			/* else */
 			else{
-				_e( '<p>Unable to validate update activation.</p>', 'text-domain' );
-				echo '<p><a href="' . $edit_url . '" class="button-primary">' . __( 'Try again', 'text-domain' ) . '</a></p>';
+				_e( '<p>Unable to validate update activation.</p>', 'auto-hosted' );
+				echo '<p><a href="' . $edit_url . '" class="button-primary">' . __( 'Try again', 'auto-hosted' ) . '</a></p>';
 			}
 		}
 		/* if activation key is not yet set/empty */
 		else{
-			echo '<p><a href="' . $edit_url . '" class="button-primary">' . __( 'Add Key', 'text-domain' ) . '</a></p>';
+			echo '<p><a href="' . $edit_url . '" class="button-primary">' . __( 'Add Key', 'auto-hosted' ) . '</a></p>';
 		}
 	}
 
 
 	/**
 	 * Dashboard Widget Control Callback
-	 *
+	 * 
 	 * @since 0.1.0
 	 */
 	public function dashboard_widget_control_callback() {
@@ -490,8 +566,9 @@ class AH_AudioPlayer_Plugin_Updater{
 		$widget_id = 'ahp_' . $updater_data['slug'] . '_activation_key';
 
 		/* check options is set before saving */
-		if ( isset( $_POST[$widget_id] ) ){
+		if ( isset( $_POST[$widget_id] ) && isset( $_POST['dashboard-widget-nonce'] ) && wp_verify_nonce( $_POST['dashboard-widget-nonce'], 'edit-dashboard-widget_' . $widget_id ) ){
 
+			/* get submitted data */
 			$submit_data = $_POST[$widget_id];
 
 			/* username submitted */
@@ -556,13 +633,13 @@ class AH_AudioPlayer_Plugin_Updater{
 		<?php if ( true === $updater_data['role'] ) { // members only update ?>
 
 		<p>
-			<label for="<?php echo $widget_id; ?>-username"><?php _e( 'User name', 'text-domain' ); ?></label>
+			<label for="<?php echo $widget_id; ?>-username"><?php _e( 'User name', 'auto-hosted' ); ?></label>
 		</p>
 		<p>
 			<input id="<?php echo $widget_id; ?>-username" name="<?php echo $widget_id; ?>[username]" type="text" value="<?php echo $username_option;?>"/>
 		</p>
 		<p>
-			<label for="<?php echo $widget_id; ?>-key"><?php _e( 'Email', 'text-domain' ); ?></label>
+			<label for="<?php echo $widget_id; ?>-key"><?php _e( 'Email', 'auto-hosted' ); ?></label>
 		</p>
 		<p>
 			<input id="<?php echo $widget_id; ?>-key" class="regular-text" name="<?php echo $widget_id; ?>[key]" type="text" value="<?php echo $key_option;?>"/>
@@ -571,7 +648,7 @@ class AH_AudioPlayer_Plugin_Updater{
 		<?php } else { // activation keys ?>
 
 		<p>
-			<label for="<?php echo $widget_id; ?>-key"><?php _e( 'Activation Key', 'text-domain' ); ?></label>
+			<label for="<?php echo $widget_id; ?>-key"><?php _e( 'Activation Key', 'auto-hosted' ); ?></label>
 		</p>
 		<p>
 			<input id="<?php echo $widget_id; ?>-key" class="regular-text" name="<?php echo $widget_id; ?>[key]" type="text" value="<?php echo $key_option;?>"/>

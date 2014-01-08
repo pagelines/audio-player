@@ -51,7 +51,7 @@ class AudioPlayer extends PageLinesSection {
 
 		wp_enqueue_script( 'ah-ap-jquery-selectbox-0.2', $this->base_url.'/js/jquery.selectbox-0.2.js' );
 
-		wp_enqueue_script( 'ah-ap-jquery-html5audio', $this->base_url.'/js/jquery.html5audio.min.js' );
+		wp_enqueue_script( 'ah-ap-jquery-html5audio', $this->base_url.'/js/jquery.html5audio-ck.js' );
 
 		wp_enqueue_script( 'ah-ap-jquery-html5audio-func', $this->base_url.'/js/jquery.html5audio.func.js' );
 
@@ -185,7 +185,8 @@ class AudioPlayer extends PageLinesSection {
 						autoReuseMailForDownload: true,
 
 						/* useKeyboardNavigation: false/false. Use keyboard navigation for music (space=toggle audio, left arrow=previous media, right arrow=next media, m=toggle volume) */
-						useKeyboardNavigation: false
+						useKeyboardNavigation: false,
+
 					};
 
 					jQuery(document).ready(function() {
